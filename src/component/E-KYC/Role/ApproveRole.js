@@ -3,7 +3,8 @@ import axios from 'axios'
 
 class ApproveRole extends Component {
     state = {
-        pendingList: []
+        pendingList: [],
+        modalData: []
     }
 
     async componentDidMount() {
@@ -52,11 +53,35 @@ class ApproveRole extends Component {
     }
 
 
+    onModalShow = async (id) => {
+        try {
+
+            let url = 'http://127.0.0.1:3001/role/get/';
+            let obj = {
+                id: id
+            }
+            let res = await axios.post(url, obj)
+            let data = res.data.data
+            this.setState({
+                modalData: data
+            })
+            console.log(data)
+
+        } catch (error) {
+            // let { reason } = error.response.data
+
+            // alert(reason.map(v => (
+            //     JSON.stringify(Object.values(v.constraints))
+            // )))
+        }
+    }
+
+
 
 
 
     render() {
-        const { pendingList } = this.state
+        const { pendingList, modalData } = this.state
         //console.log(pendingList)
         // pendingList.map(v => {
         //     // console.log(v.rolePrivileges)
@@ -67,7 +92,7 @@ class ApproveRole extends Component {
 
         return (
             <div className="col-sm-12" >
-                <div className="divBg">
+                {/* <div className="divBg">
                     <h4 className="text-center pt-3">
                         Approve Pending Role
                     </h4>
@@ -108,7 +133,132 @@ class ApproveRole extends Component {
 
 
                     </tbody>
-                </table>
+                </table> */}
+                <div className="card mt-3">
+                    <div className="im">
+                        <h5 className="text-muted text-center pt-2">
+                            Approve Role
+                        </h5>
+                    </div>
+                    <div className="card-body">
+                        <div className="row d-flex justify-content-center">
+                            {
+                                pendingList.map((value, index) => (
+                                    <div key={index} className="col-sm-3 mr-2 divBgCard" style={{ color: "#333", padding: "15px" }}>
+                                        <div className="text-center im">
+                                            <small className="text-muted"><i class="fas fa-sort-numeric-up"></i> ID : <span>{value.id}</span></small>
+                                        </div>
+                                        <hr />
+
+
+                                        <div>
+                                            <small className="text-muted"><i class="fas fa-battery-three-quarters"></i> Status : <span>{value.status}</span></small>
+                                        </div>
+                                        <div>
+                                            <small className="text-muted"><i class="fab fa-mizuni"></i> Role Name : <span>{value.roleName}</span></small>
+                                        </div>
+
+                                        <div>
+                                            <small className="text-muted"><i class="fas fa-pen-nib"></i> Description : <span>{value.description}</span></small>
+                                        </div>
+                                        <div>
+                                            <small className="text-muted"><i class="fas fa-digital-tachograph"></i> IP List : <span>{value.grantedIPList.map(v => v + ", ")}</span></small>
+                                        </div>
+                                        <hr />
+
+                                        <div className="d-flex justify-content-center mt-2">
+                                            <span className="sbtn mr-2" onClick={() => this.onApprove(value.id)}>Approve</span>
+                                            <span className="sbtnx mr-2" onClick={() => this.onReject(value.id)}>Archive</span>
+                                            <span className="sbtnxy" data-toggle="modal" data-target="#exampleModalCenter" onClick={() => this.onModalShow(value.id)} >Details</span>
+                                        </div>
+
+
+
+                                        {/* <!-- Modal --> */}
+                                        <div className="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                            <div className="modal-dialog modal-dialog-centered" role="document">
+                                                <div className="modal-content imTwo">
+                                                    <div className="modal-header divBg">
+                                                        <h5 className="modal-title" id="exampleModalCenterTitle">Role Details</h5>
+                                                        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div className="modal-body">
+                                                        {modalData.map(val => (
+                                                            <div className="">
+                                                                <div className="">
+                                                                    <small className="text-muted"><i class="fas fa-sort-numeric-up"></i> ID : <span>{val.id}</span></small>
+                                                                </div>
+
+                                                                <div>
+                                                                    <small className="text-muted"><i class="fas fa-battery-three-quarters"></i> Status : <span>{val.status}</span></small>
+                                                                </div>
+
+                                                                <div>
+                                                                    <small className="text-muted"><i class="fab fa-mizuni"></i> Role Name : <span>{val.roleName}</span></small>
+                                                                </div>
+                                                                <hr />
+                                                                <div>
+                                                                    <small className="text-muted"><i class="fas fa-pen-nib"></i> Description : <span>{val.description}</span></small>
+                                                                </div>
+
+                                                                <div>
+                                                                    <small className="text-muted"><i class="fas fa-digital-tachograph"></i> IP List : <span>{val.grantedIPList.map(v => v + ", ")}</span></small>
+                                                                </div>
+
+                                                                <div>
+                                                                    <small className="text-muted"><i class="fab fa-elementor"></i> Features : <span>{val.rolePrivileges.map(v => v[1] + ", ")}</span></small>
+                                                                </div>
+                                                                <hr />
+                                                                <div>
+                                                                    <small className="text-muted"><i class="fas fa-user-shield"></i> Created By : <span>{val.createdBy}</span></small>
+                                                                </div>
+                                                                <div>
+                                                                    <small className="text-muted"><i class="fas fa-user-tag"></i> Approved By : <span>{val.approvedBy}</span></small>
+                                                                </div>
+                                                                <div>
+                                                                    <small className="text-muted"><i class="fas fa-user-edit"></i> Updated By : <span>{val.updatedBy}</span></small>
+                                                                </div>
+
+                                                                <div>
+                                                                    <small className="text-muted"><i class="fas fa-calendar-check"></i> Created Date : <span>{val.createDate}</span></small>
+                                                                </div>
+
+                                                                <div>
+                                                                    <small className="text-muted"><i class="far fa-calendar-alt"></i> Approved Date : <span>{val.approveDate}</span></small>
+                                                                </div>
+
+
+                                                                <div>
+                                                                    <small className="text-muted"><i class="far fa-calendar-check"></i> Updated Date : <span>{val.updateDate}</span></small>
+                                                                </div>
+
+                                                            </div>
+
+                                                        ))}
+                                                    </div>
+                                                    <div className="modal-footer imTwo">
+                                                        <span className="sbtnx" data-dismiss="modal">Close</span>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                ))
+                            }
+                        </div>
+
+                    </div>
+
+
+
+
+
+                </div>
             </div>
         )
     }

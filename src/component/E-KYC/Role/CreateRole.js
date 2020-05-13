@@ -72,9 +72,10 @@ class CreateRole extends Component {
         } catch (error) {
             let { reason } = error.response.data
 
-            alert(reason.map(v => (
-                JSON.stringify(Object.values(v.constraints))
-            )))
+            // alert(reason.map(v => (
+            //     JSON.stringify(Object.values(v.constraints))
+            // )))
+            console.log(reason)
         }
 
 
