@@ -10,6 +10,15 @@ import "./sidebar.css";
 import { pruneRouteArray, getFlatRouteArray } from '../flattenObjectTwo';
 import profileImage from "./image/undraw_profile_pic_ic5t.svg"
 
+// face-forms
+import NidImages from '../E-KYC/Simplified/FaceForms/NidImages';
+import CaptureFace from '../E-KYC/Simplified/FaceForms/CaptureFace';
+import PersonalDetails from '../E-KYC/Simplified/FaceForms/PersonalDetails';
+import Nominee from '../E-KYC/Simplified/FaceForms/Nominee';
+import Signature from '../E-KYC/Simplified/FaceForms/Signature';
+import ConfirmInfo from '../E-KYC/Simplified/FaceForms/ConfirmInfo';
+import Complete from '../E-KYC/Simplified/FaceForms/Complete';
+
 function Dashboard() {
     // console.log("In the DashboardTwo")
     let feature = JSON.parse(sessionStorage.getItem("featureList"))
@@ -65,7 +74,7 @@ function Dashboard() {
                 <Nav />
                 <div className="d-flex" style={{ margin: "0", padding: "0", overflowX: "hidden" }}>
                     <input type="checkbox" id="check" />
-                    <label for="check">
+                    <label htmlFor="check">
 
 
                         <i className="fas fa-backspace" id="cancel"></i>
@@ -192,6 +201,15 @@ function Dashboard() {
 
                                 <Route path={`${path}/face-account`} component={MultiStepFace} />
                                 <Route path={`${path}/dynamic-comp`} component={JointMultiStep} />
+
+                                 {/* face forms */}
+                                 <Route path={`${path}/nid-images`} component={NidImages} />
+                                <Route path={`${path}/capture-face`} component={CaptureFace} />
+                                <Route path={`${path}/personal-details`} component={PersonalDetails} />
+                                <Route path={`${path}/nominee`} component={Nominee} />
+                                <Route path={`${path}/signature`} component={Signature} />
+                                <Route path={`${path}/confirm-info`} component={ConfirmInfo} />
+                                <Route path={`${path}/complete`} component={Complete} />
 
                                 <Route path={`${path}/success`} component={Success} />
 

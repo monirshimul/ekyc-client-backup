@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import { withRouter } from 'react-router-dom'
+import { NotificationManager } from "react-notifications";
 
 class RoleList extends Component {
     state = {
@@ -11,6 +12,7 @@ class RoleList extends Component {
         checkBoxValue: "",
         checkBoxTwo: false,
         checkBoxThree: false,
+        archeived: false
     }
 
     async componentDidMount() {
@@ -25,14 +27,19 @@ class RoleList extends Component {
 
     }
 
-    // async componentDidUpdate() {
-    //     const Obj = { status: "A" };
-    //     let url = 'http://127.0.0.1:3001/role/get/';
-    //     let res = await axios.post(url, Obj);
-    //     this.setState({
-    //         pendingList: res.data.data
-    //     })
-    // }
+    async componentDidUpdate(prevProps, prevState) {
+        if (prevState.archeived !== this.state.archeived) {
+            const Obj = { status: "A" };
+            let url = 'http://127.0.0.1:3001/role/get/';
+            let res = await axios.post(url, Obj);
+            this.setState({
+                pendingList: res.data.data
+            })
+        } else {
+            return false
+        }
+
+    }
 
     textHandleChange = e => {
         e.preventDefault()
@@ -173,7 +180,7 @@ class RoleList extends Component {
 
             }
             let res = await axios.post(url, obj)
-            //console.log(res.data.data)
+            console.log("200line",res.data)
             let data = res.data.data
             //console.log(data)
 
@@ -182,7 +189,7 @@ class RoleList extends Component {
                 status: data[0].status,
                 roleName: data[0].roleName,
                 description: data[0].description,
-                grantedIPList: data[0].grantedIPList,
+                grantedIPList: data[0].grantedIPList !== null ? data[0].grantedIPList : "",
                 rolePrivileges: data[0].rolePrivileges
 
             }
@@ -190,25 +197,36 @@ class RoleList extends Component {
 
             this.props.history.push("/dashboard/update-role", roleData)
         } catch (error) {
-            // let { reason } = error.response.data
-
-            // alert(reason.map(v => (
-            //     JSON.stringify(Object.values(v.constraints))
-            // )))
+            let { message } = error.response.data
+            let { statusCode } = error.response.data
+            console.log("error.response", error.response.data)
+            NotificationManager.error(statusCode + ',' + message, "Error", 5000);
         }
 
 
 
     }
     onArchive = async (id) => {
-        console.log("id", id)
-        let url = 'http://127.0.0.1:3001/role/status';
-        let data = {
-            id: id,
-            status: "D"
+        try {
+            //console.log("id", id)
+            let url = 'http://127.0.0.1:3001/role/status';
+            let data = {
+                id: id,
+                status: "D"
+            }
+            let res = await axios.put(url, data)
+            this.setState({
+                archeived: !this.state.archeived
+            })
+            NotificationManager.warning("Role Archeived", "Confirmed", 5000);
+            //console.log(res.data)
+        } catch (error) {
+            let { message } = error.response.data
+            let { statusCode } = error.response.data
+            console.log("error.response", error.response.data)
+            NotificationManager.error(statusCode + ',' + message, "Error", 5000);
         }
-        let res = await axios.put(url, data)
-        //console.log(res.data)
+
 
     }
 
@@ -250,6 +268,9 @@ class RoleList extends Component {
         //     console.log("Check Three", checkBoxThree)
         //     console.log("Check Three value", checkBoxValue)
         // }
+
+        //console.log("Pendinglist", pendingList);
+
         return (
             <div className="col-sm-12" >
 
@@ -258,7 +279,7 @@ class RoleList extends Component {
                     <div className="card col" style={{ padding: "25px" }}>
                         <div className="im">
                             <h5 className="text-muted text-center pt-2">
-                                Search Role
+                                <i class="fas fa-search"></i> Search Role
                         </h5>
                         </div>
                         <div className="card-body d-flex justify-content-center">
@@ -285,7 +306,7 @@ class RoleList extends Component {
                                             id="one"
                                             disabled={checkBoxValue !== "" ? true : false}
                                         />
-                                        <label className="custom-control-label" for="one">Search By ID</label>
+                                        <label className="custom-control-label" htmlFor="one">Search By ID</label>
 
                                     </div>
                                     <div className="custom-control custom-checkbox" style={{ marginLeft: "25px" }} >
@@ -302,7 +323,7 @@ class RoleList extends Component {
                                             id="two"
                                             disabled={checkBoxValue !== "" ? true : false}
                                         />
-                                        <label className="custom-control-label" for="two">Search By Status</label>
+                                        <label className="custom-control-label" htmlFor="two">Search By Status</label>
 
                                     </div>
                                     <div className="custom-control custom-checkbox" style={{ marginLeft: "25px" }} >
@@ -319,12 +340,12 @@ class RoleList extends Component {
                                             id="three"
                                             disabled={checkBoxValue !== "" ? true : false}
                                         />
-                                        <label className="custom-control-label" for="three">Search By Role Name</label>
+                                        <label className="custom-control-label" htmlFor="three">Search By Role Name</label>
 
                                     </div>
                                 </div>
                                 <div className="d-flex justify-content-center pt-2" >
-                                    <button onClick={(e) => this.onSearchSubmit(e)} className="b" >Search</button>
+                                    <button onClick={(e) => this.onSearchSubmit(e)} className="b" ><i class="fas fa-search"></i> Search</button>
                                 </div>
                             </form>
                         </div>
@@ -375,7 +396,7 @@ class RoleList extends Component {
                 <div className="card mt-3">
                     <div className="im">
                         <h5 className="text-muted text-center pt-2">
-                            Role List
+                            <i class="fas fa-list-ul"></i> Role List
                         </h5>
                     </div>
                     <div className="card-body">
@@ -384,40 +405,40 @@ class RoleList extends Component {
                                 pendingList.map((value, index) => (
                                     <div key={index} className="col-sm-3 mr-2 divBgCard" style={{ color: "#333", padding: "15px" }}>
                                         <div className="text-center im">
-                                            <small className="text-muted"><i class="fas fa-sort-numeric-up"></i> ID : <span>{value.id}</span></small>
+                                            <small className="text-muted"><i className="fas fa-sort-numeric-up"></i> ID : <span>{value.id}</span></small>
                                         </div>
                                         <hr />
 
 
                                         <div>
-                                            <small className="text-muted"><i class="fas fa-battery-three-quarters"></i> Status : <span>{value.status}</span></small>
+                                            <small className="text-muted"><i className="fas fa-battery-three-quarters"></i> Status : <span>{value.status}</span></small>
                                         </div>
                                         <div>
-                                            <small className="text-muted"><i class="fab fa-mizuni"></i> Role Name : <span>{value.roleName}</span></small>
+                                            <small className="text-muted"><i className="fab fa-mizuni"></i> Role Name : <span>{value.roleName}</span></small>
                                         </div>
 
                                         <div>
-                                            <small className="text-muted"><i class="fas fa-pen-nib"></i> Description : <span>{value.description}</span></small>
+                                            <small className="text-muted"><i className="fas fa-pen-nib"></i> Description : <span>{value.description}</span></small>
                                         </div>
                                         <div>
-                                            <small className="text-muted"><i class="fas fa-digital-tachograph"></i> IP List : <span>{value.grantedIPList.map(v => v + ", ")}</span></small>
+                                            <small className="text-muted"><i className="fas fa-digital-tachograph"></i> IP List : <span>{value.grantedIPList !== null ? value.grantedIPList.map(v => v + ", "): ""}</span></small>
                                         </div>
                                         <hr />
 
                                         <div className="d-flex justify-content-center mt-2">
-                                            <span className="sbtn mr-2" onClick={() => this.onUpdate(value.id)}>Update</span>
-                                            <span className="sbtnx mr-2" onClick={() => this.onArchive(value.id)}>Archive</span>
-                                            <span className="sbtnxy" data-toggle="modal" data-target="#exampleModalCenter" onClick={() => this.onModalShow(value.id)} >Details</span>
+                                            <span className="sbtn mr-2" onClick={() => this.onUpdate(value.id)}><i class="far fa-edit"></i> Update</span>
+                                            <span className="sbtnx mr-2" onClick={() => this.onArchive(value.id)}><i class="fas fa-archive"></i> Archive</span>
+                                            <span className="sbtnxy" data-toggle="modal" data-target="#exampleModalCenter" onClick={() => this.onModalShow(value.id)} ><i class="fas fa-binoculars"></i> Details</span>
                                         </div>
 
 
 
                                         {/* <!-- Modal --> */}
-                                        <div className="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                        <div className="modal fade" id="exampleModalCenter" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                                             <div className="modal-dialog modal-dialog-centered" role="document">
                                                 <div className="modal-content imTwo">
                                                     <div className="modal-header divBg">
-                                                        <h5 className="modal-title" id="exampleModalCenterTitle">Role Details</h5>
+                                                        <h5 className="modal-title" id="exampleModalCenterTitle"><i class="far fa-arrow-alt-circle-right"></i> Role Details</h5>
                                                         <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                                             <span aria-hidden="true">&times;</span>
                                                         </button>
@@ -426,50 +447,50 @@ class RoleList extends Component {
                                                         {modalData.map(val => (
                                                             <div className="">
                                                                 <div className="">
-                                                                    <small className="text-muted"><i class="fas fa-sort-numeric-up"></i> ID : <span>{val.id}</span></small>
+                                                                    <small className="text-muted"><i className="fas fa-sort-numeric-up"></i> ID : <span>{val.id}</span></small>
                                                                 </div>
 
                                                                 <div>
-                                                                    <small className="text-muted"><i class="fas fa-battery-three-quarters"></i> Status : <span>{val.status}</span></small>
+                                                                    <small className="text-muted"><i className="fas fa-battery-three-quarters"></i> Status : <span>{val.status}</span></small>
                                                                 </div>
 
                                                                 <div>
-                                                                    <small className="text-muted"><i class="fab fa-mizuni"></i> Role Name : <span>{val.roleName}</span></small>
+                                                                    <small className="text-muted"><i className="fab fa-mizuni"></i> Role Name : <span>{val.roleName}</span></small>
                                                                 </div>
                                                                 <hr />
                                                                 <div>
-                                                                    <small className="text-muted"><i class="fas fa-pen-nib"></i> Description : <span>{val.description}</span></small>
+                                                                    <small className="text-muted"><i className="fas fa-pen-nib"></i> Description : <span>{val.description}</span></small>
                                                                 </div>
 
                                                                 <div>
-                                                                    <small className="text-muted"><i class="fas fa-digital-tachograph"></i> IP List : <span>{val.grantedIPList.map(v => v + ", ")}</span></small>
+                                                                    <small className="text-muted"><i className="fas fa-digital-tachograph"></i> IP List : <span>{val.grantedIPList.map(v => v + ", ")}</span></small>
                                                                 </div>
 
                                                                 <div>
-                                                                    <small className="text-muted"><i class="fab fa-elementor"></i> Features : <span>{val.rolePrivileges.map(v => v[1] + ", ")}</span></small>
+                                                                    <small className="text-muted"><i className="fab fa-elementor"></i> Features : <span>{val.rolePrivileges.map(v => v[1] + ", ")}</span></small>
                                                                 </div>
                                                                 <hr />
                                                                 <div>
-                                                                    <small className="text-muted"><i class="fas fa-user-shield"></i> Created By : <span>{val.createdBy}</span></small>
+                                                                    <small className="text-muted"><i className="fas fa-user-shield"></i> Created By : <span>{val.createdBy}</span></small>
                                                                 </div>
                                                                 <div>
-                                                                    <small className="text-muted"><i class="fas fa-user-tag"></i> Approved By : <span>{val.approvedBy}</span></small>
+                                                                    <small className="text-muted"><i className="fas fa-user-tag"></i> Approved By : <span>{val.approvedBy}</span></small>
                                                                 </div>
                                                                 <div>
-                                                                    <small className="text-muted"><i class="fas fa-user-edit"></i> Updated By : <span>{val.updatedBy}</span></small>
-                                                                </div>
-
-                                                                <div>
-                                                                    <small className="text-muted"><i class="fas fa-calendar-check"></i> Created Date : <span>{val.createDate}</span></small>
+                                                                    <small className="text-muted"><i className="fas fa-user-edit"></i> Updated By : <span>{val.updatedBy}</span></small>
                                                                 </div>
 
                                                                 <div>
-                                                                    <small className="text-muted"><i class="far fa-calendar-alt"></i> Approved Date : <span>{val.approveDate}</span></small>
+                                                                    <small className="text-muted"><i className="fas fa-calendar-check"></i> Created Date : <span>{val.createDate}</span></small>
+                                                                </div>
+
+                                                                <div>
+                                                                    <small className="text-muted"><i className="far fa-calendar-alt"></i> Approved Date : <span>{val.approveDate}</span></small>
                                                                 </div>
 
 
                                                                 <div>
-                                                                    <small className="text-muted"><i class="far fa-calendar-check"></i> Updated Date : <span>{val.updateDate}</span></small>
+                                                                    <small className="text-muted"><i className="far fa-calendar-check"></i> Updated Date : <span>{val.updateDate}</span></small>
                                                                 </div>
 
                                                             </div>
